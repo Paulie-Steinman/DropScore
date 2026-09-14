@@ -397,6 +397,33 @@ def debug_dashboard_full(request: Request, db: Session = Depends(get_db)):
         return {"error": str(e), "traceback": traceback.format_exc()}
 
 
+@app.get("/debug/volume")
+def debug_volume():
+    """Debug: check Railway volume mount for DB persistence."""
+    import os
+    db_path = os.getenv("DB_PATH", "app.db")
+    cwd = os.getcwd()
+    abs_db = os.path.abspath(db_path)
+    db_exists = os.path.isfile(abs_db)
+    # Check mount info
+    mounts = []
+    try:
+        with open("/proc/mounts") as f:
+            for line in f:
+                if "railway" in line.lower() or "/app" in line:
+                    mounts.append(line.strip())
+    except Exception:
+        mounts = ["/proc/mounts not readable"]
+    return {
+        "cwd": cwd,
+        "db_path_env": db_path,
+        "db_absolute": abs_db,
+        "db_exists": db_exists,
+        "mounts_related": mounts,
+        "check_command": "db_path=%s → cwd=%s → %s exists=%s" % (db_path, cwd, abs_db, db_exists)
+    }
+
+
 @app.get("/debug/template-path")
 def debug_template_path():
     """Debug: check template directory and Jinja2/Starlette versions."""
