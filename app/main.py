@@ -405,13 +405,15 @@ def debug_volume():
     cwd = os.getcwd()
     abs_db = os.path.abspath(db_path)
     db_exists = os.path.isfile(abs_db)
-    # Check mount info
+    db_size = os.path.getsize(abs_db) if db_exists else 0
+    # Check ALL mounts
     mounts = []
     try:
         with open("/proc/mounts") as f:
             for line in f:
-                if "railway" in line.lower() or "/app" in line:
-                    mounts.append(line.strip())
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    mounts.append({"device": parts[0], "mount": parts[1], "fstype": parts[2]})
     except Exception:
         mounts = ["/proc/mounts not readable"]
     return {
@@ -419,8 +421,9 @@ def debug_volume():
         "db_path_env": db_path,
         "db_absolute": abs_db,
         "db_exists": db_exists,
-        "mounts_related": mounts,
-        "check_command": "db_path=%s → cwd=%s → %s exists=%s" % (db_path, cwd, abs_db, db_exists)
+        "db_size_bytes": db_size,
+        "mounts_full": mounts,
+        "num_mounts": len(mounts),
     }
 
 
