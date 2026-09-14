@@ -419,8 +419,11 @@ def debug_dashboard_full(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/debug/template-path")
 def debug_template_path():
-    """Debug: check if template directory exists and can render."""
+    """Debug: check template directory and Jinja2/Starlette versions."""
     import os
+    import jinja2
+    import starlette
+    dirpath = os.path.join(os.getcwd(), "app", "templates")
     template_dir = os.path.abspath("app/templates")
     files = []
     if os.path.isdir(template_dir):
