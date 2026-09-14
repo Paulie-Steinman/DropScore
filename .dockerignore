@@ -1,0 +1,11 @@
+.env
+*.db
+.git
+.gitignore
+__pycache__/
+.smarty_cache/
+README.md
+base_addresses.txt
+bin/
+dropscore.py
+jig_library.csv

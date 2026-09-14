@@ -359,3 +359,26 @@ def export_csv(
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/debug/template-path")
+def debug_template_path():
+    """Debug: check if template directory exists and can render."""
+    import os
+    template_dir = os.path.abspath("app/templates")
+    files = []
+    if os.path.isdir(template_dir):
+        files = os.listdir(template_dir)
+    else:
+        files = [f"DIRECTORY NOT FOUND at {template_dir}"]
+    
+    cwd = os.getcwd()
+    sys_path = __import__("sys").path[:3]
+    
+    return {
+        "cwd": cwd,
+        "template_dir": template_dir,
+        "exists": os.path.isdir(template_dir),
+        "files": files,
+        "sys_path": sys_path,
+    }
