@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DropScore · {% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJNMT3HlI1Gv+0j3eC8N+kP5L6U6V8F3qY5V0G" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">DropScore</h1>
+                <span class="subtitle">address lifecycle</span>
+            </div>
+            <nav class="nav">
+                <a href="/" class="nav-item {% if request.url.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="/generate" class="nav-item {% if request.url.path == '/generate' %}active{% endif %}">
+                    <span class="nav-icon">⚙️</span> Generate
+                </a>
+                <a href="/import" class="nav-item {% if request.url.path == '/import' %}active{% endif %}">
+                    <span class="nav-icon">📥</span> Import Results
+                </a>
+                <a href="/library" class="nav-item {% if request.url.path == '/library' %}active{% endif %}">
+                    <span class="nav-icon">📚</span> Library
+                </a>
+            </nav>
+        </aside>
+        <main class="main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

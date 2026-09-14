@@ -1,0 +1,1 @@
+"""FastAPI app for DropScore — dark-themed web UI for address scoring lifecycle."""

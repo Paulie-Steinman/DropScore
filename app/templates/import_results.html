@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Import Results{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Import Post-Drop Results</h2>
+    <p class="subtitle">Paste the addresses that worked and didn't work after your drop.</p>
+</div>
+
+<form method="POST" action="/import" class="form-card">
+    <div class="form-row">
+        <label for="successes">✅ Addresses that worked <span class="dim">(one per line)</span></label>
+        <textarea id="successes" name="successes" rows="6" placeholder="111 4th Place Apt 3B, Brooklyn, NY 11231&#10;267 Douglass St Ste 1, Brooklyn, NY 11217"></textarea>
+    </div>
+
+    <div class="form-row">
+        <label for="failures">❌ Addresses that failed <span class="dim">(optional, one per line)</span></label>
+        <textarea id="failures" name="failures" rows="4" placeholder="111 4th Pl, Brooklyn, NY 11231&#10;265 Douglass St Ground Floor, Brooklyn, NY 11217"></textarea>
+    </div>
+
+    <div class="form-row">
+        <label for="drop_label">Drop Label <span class="dim">(optional, e.g. "PKC Oct 27")</span></label>
+        <input type="text" id="drop_label" name="drop_label" placeholder="e.g. Walmart Nov drop">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Scores</button>
+</form>
+
+{% if result %}
+<div class="result-card">
+    <h3>Updated</h3>
+    <p>
+        ✅ {{ result.successes_updated }} addresses marked as successful<br>
+        ❌ {{ result.failures_updated }} addresses marked as failed<br>
+        {% if result.not_found %}
+        ⚠️ {{ result.total_not_found }} addresses not found in library
+        <details>
+            <summary>Not found ({{ result.not_found|length }} shown)</summary>
+            <ul class="error-list">
+                {% for addr in result.not_found %}
+                <li class="dim">{{ addr }}</li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endif %}
+    </p>
+    <a href="/library" class="btn btn-secondary">View Updated Library</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Dashboard</h2>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_variants }}</div>
+        <div class="stat-label">Total Variants</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ sum_attempts }}</div>
+        <div class="stat-label">Tested</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_successes }}</div>
+        <div class="stat-label">Total Successes</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ untested }}</div>
+        <div class="stat-label">Untested</div>
+    </div>
+</div>
+
+{% if retailer_counts %}
+<div class="section">
+    <h3>By Retailer</h3>
+    <div class="retailer-list">
+        {% for name, count in retailer_counts.items() %}
+        <div class="retailer-chip">{{ name }}: <strong>{{ count }}</strong></div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if top_performers %}
+<div class="section">
+    <h3>Top Performers</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Retailer</th>
+                <th>Score</th>
+                <th>A/S</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in top_performers %}
+            <tr>
+                <td class="addr-cell">
+                    <span class="mono">{{ v.line1 }}</span>
+                    {% if v.line2 %}<span class="mono dim">, {{ v.line2 }}</span>{% endif %}
+                    <span class="dim"> · {{ v.city }}, {{ v.state }} {{ v.zip5 }}</span>
+                </td>
+                <td>{{ v.retailer or "—" }}</td>
+                <td class="score-cell {{ 'high' if v.score >= 0.8 else 'medium' if v.score >= 0.5 else 'low' }}">
+                    {{ "%.3f"|format(v.score) }}
+                </td>
+                <td class="mono">{{ v.successes }}/{{ v.attempts }}</td>
+                <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

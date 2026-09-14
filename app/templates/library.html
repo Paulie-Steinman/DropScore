@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Library{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Library</h2>
+    <a href="/export" class="btn btn-sm btn-secondary">⬇ Export Active</a>
+</div>
+
+<form method="GET" action="/library" class="filter-bar">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search address..." class="filter-input">
+    <select name="retailer" class="filter-select">
+        <option value="">All retailers</option>
+        {% for r in all_retailers %}
+        <option value="{{ r }}" {% if retailer == r %}selected{% endif %}>{{ r }}</option>
+        {% endfor %}
+    </select>
+    <select name="status" class="filter-select">
+        <option value="">All status</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+        <option value="flagged" {% if status_filter == 'flagged' %}selected{% endif %}>Flagged</option>
+        <option value="retired" {% if status_filter == 'retired' %}selected{% endif %}>Retired</option>
+    </select>
+    <input type="number" name="min_score" value="{{ min_score }}" placeholder="Min score" step="0.1" min="0" max="1" class="filter-input filter-narrow">
+    <select name="sort" class="filter-select filter-narrow">
+        <option value="score" {% if sort == 'score' %}selected{% endif %}>Score</option>
+        <option value="attempts" {% if sort == 'attempts' %}selected{% endif %}>Attempts</option>
+        <option value="successes" {% if sort == 'successes' %}selected{% endif %}>Successes</option>
+        <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Newest</option>
+    </select>
+    <select name="order" class="filter-select filter-narrow">
+        <option value="desc" {% if order == 'desc' %}selected{% endif %}>↓ Desc</option>
+        <option value="asc" {% if order == 'asc' %}selected{% endif %}>↑ Asc</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    <a href="/library" class="btn btn-sm btn-secondary">Reset</a>
+</form>
+
+<div class="table-meta">
+    {{ total }} variants · page {{ page }} / {{ total_pages }}
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>Retailer</th>
+            <th>Score</th>
+            <th>A/S</th>
+            <th>Status</th>
+            <th>Last Drop</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in variants %}
+        <tr>
+            <td class="addr-cell">
+                <span class="mono">{{ v.line1 }}</span>
+                {% if v.line2 %}<span class="mono dim">, {{ v.line2 }}</span>{% endif %}
+                <span class="dim"> · {{ v.city }}, {{ v.state }} {{ v.zip5 }}{{ "-" + v.zip4 if v.zip4 else "" }}</span>
+            </td>
+            <td>{{ v.retailer or "—" }}</td>
+            <td class="score-cell {{ 'high' if v.score >= 0.8 else 'medium' if v.score >= 0.5 else 'low' }}">
+                {{ "%.3f"|format(v.score) }}
+            </td>
+            <td class="mono">{{ v.successes }}/{{ v.attempts }}</td>
+            <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
+            <td class="dim">{{ v.last_drop.strftime("%m/%d") if v.last_drop else "—" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">No variants match your filters.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="?page={{ page - 1 }}&retailer={{ retailer }}&status={{ status_filter }}&min_score={{ min_score }}&sort={{ sort }}&order={{ order }}&q={{ q }}" class="btn btn-sm btn-secondary">← Prev</a>
+    {% endif %}
+    <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+    <a href="?page={{ page + 1 }}&retailer={{ retailer }}&status={{ status_filter }}&min_score={{ min_score }}&sort={{ sort }}&order={{ order }}&q={{ q }}" class="btn btn-sm btn-secondary">Next →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

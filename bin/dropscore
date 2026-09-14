@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+PYTHON="/usr/local/bin/python3"
+
+if [ -x "$PYTHON" ]; then
+    exec "$PYTHON" /Users/hotdog/dropscore/dropscore.py "$@"
+fi
+
+echo "Error: no python3 found" >&2
+exit 1

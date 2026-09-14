@@ -1,0 +1,14 @@
+[project]
+name = "dropscore"
+version = "0.2.0"
+description = "Address jigging and lifecycle tool for botting ops"
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "sqlalchemy>=2.0.0",
+    "jinja2>=3.1.0",
+    "aiofiles>=24.0",
+    "python-multipart>=0.0.12",
+]

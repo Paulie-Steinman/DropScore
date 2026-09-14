@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Generate{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <h2>Generate Addresses</h2>
+    <p class="subtitle">Paste base addresses and generate jigged variants.</p>
+</div>
+
+<form method="POST" action="/generate" class="form-card">
+    <div class="form-row">
+        <label for="addresses">Base Addresses <span class="dim">(one per line)</span></label>
+        <textarea id="addresses" name="addresses" rows="8" placeholder="111 4th Place Apt 3B, Brooklyn, NY 11231&#10;267 Douglass St, Suite 1, Brooklyn, NY 11217" required></textarea>
+    </div>
+
+    <div class="form-row-group">
+        <div class="form-row">
+            <label for="retailer">Retailer Profile <span class="dim">(optional)</span></label>
+            <select id="retailer" name="retailer">
+                <option value="">None — all variants</option>
+                {% for r in retailers %}
+                <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="max_per_address">Max per address</label>
+            <input type="number" id="max_per_address" name="max_per_address" value="30" min="1" max="500">
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Generate</button>
+</form>
+
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+{% if result %}
+<div class="result-card">
+    <h3>Results</h3>
+    <p>
+        Generated <strong>{{ result.generated }}</strong> new variants
+        {% if result.skipped %} ({{ result.skipped }} duplicates skipped){% endif %}
+        from {{ result.total_input }} base addresses.
+    </p>
+    {% if result.errors %}
+    <details>
+        <summary>{{ result.errors|length }} parsing errors</summary>
+        <ul class="error-list">
+            {% for e in result.errors %}
+            <li class="dim">{{ e }}</li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
+    <a href="/library" class="btn btn-secondary">View Library</a>
+</div>
+{% endif %}
+
+{% endblock %}
