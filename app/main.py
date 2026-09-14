@@ -361,6 +361,50 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/debug/render-test")
+def debug_render(request: Request):
+    """Debug: try to render dashboard template and catch any error."""
+    import traceback
+    try:
+        t = templates.get_template("dashboard.html")
+        rendered = t.render(request=request, total_variants=0, sum_attempts=0,
+                          total_successes=0, untested=0, top_performers=[],
+                          retailer_counts={})
+        return {"template_found": True, "rendered_len": len(rendered)}
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
+
+@app.get("/debug/db-test")
+def debug_db(db: Session = Depends(get_db)):
+    """Debug: test database query."""
+    try:
+        count = db.query(Variant).count()
+        return {"db_ok": True, "variant_count": count}
+    except Exception as e:
+        return {"db_error": str(e)}
+
+
+@app.get("/debug/full-dashboard")
+def debug_dashboard_full(request: Request, db: Session = Depends(get_db)):
+    """Debug: try full dashboard render with DB."""
+    import traceback
+    try:
+        total_variants = db.query(Variant).count()
+        rendered = templates.TemplateResponse("dashboard.html", {
+            "request": request,
+            "total_variants": total_variants,
+            "sum_attempts": 0,
+            "total_successes": 0,
+            "untested": 0,
+            "top_performers": [],
+            "retailer_counts": {},
+        })
+        return {"status": "ok", "rendered": str(type(rendered))}
+    except Exception as e:
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
+
 @app.get("/debug/template-path")
 def debug_template_path():
     """Debug: check if template directory exists and can render."""
