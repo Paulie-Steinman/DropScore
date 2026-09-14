@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import FastAPI, Request, Depends, Query, Form, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.responses import HTMLResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -36,6 +37,17 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Template engine
 templates = Jinja2Templates(directory="app/templates")
+
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request: Request, exc: Exception):
+    """Return full traceback for any exception during debug."""
+    import traceback
+    tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    return JSONResponse(
+        status_code=500,
+        content={"error": str(exc), "traceback": tb}
+    )
 
 
 @app.on_event("startup")
