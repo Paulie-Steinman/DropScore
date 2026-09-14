@@ -18,7 +18,6 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import FastAPI, Request, Depends, Query, Form, HTTPException
-from fastapi.responses import JSONResponse
 from fastapi.responses import HTMLResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -37,17 +36,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Template engine
 templates = Jinja2Templates(directory="app/templates")
-
-
-@app.exception_handler(Exception)
-async def debug_exception_handler(request: Request, exc: Exception):
-    """Return full traceback for any exception during debug."""
-    import traceback
-    tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
-    return JSONResponse(
-        status_code=500,
-        content={"error": str(exc), "traceback": tb}
-    )
 
 
 @app.on_event("startup")
@@ -107,8 +95,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         if r[0]:
             retailer_counts[r[0]] = r[1]
 
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "dashboard.html", {
         "total_variants": total_variants,
         "sum_attempts": sum_attempts,
         "total_successes": total_successes,
@@ -120,8 +107,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/generate", response_class=HTMLResponse)
 def generate_form(request: Request):
-    return templates.TemplateResponse("generate.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "generate.html", {
         "retailers": list(RETAILER_PROFILES.keys()),
         "result": None,
     })
@@ -141,8 +127,7 @@ def generate_submit(
 
     raw_lines = [l.strip() for l in addresses.split("\n") if l.strip()]
     if not raw_lines:
-        return templates.TemplateResponse("generate.html", {
-            "request": request,
+        return templates.TemplateResponse(request, "generate.html", {
             "retailers": list(RETAILER_PROFILES.keys()),
             "error": "No addresses provided.",
             "result": None,
@@ -192,8 +177,7 @@ def generate_submit(
 
     db.commit()
 
-    return templates.TemplateResponse("generate.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "generate.html", {
         "retailers": list(RETAILER_PROFILES.keys()),
         "result": {
             "generated": generated,
@@ -206,8 +190,7 @@ def generate_submit(
 
 @app.get("/import", response_class=HTMLResponse)
 def import_form(request: Request):
-    return templates.TemplateResponse("import_results.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "import_results.html", {
         "result": None,
     })
 
@@ -259,8 +242,7 @@ def import_submit(
 
     db.commit()
 
-    return templates.TemplateResponse("import_results.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "import_results.html", {
         "result": {
             "successes_updated": updated_successes,
             "failures_updated": updated_failures,
@@ -311,8 +293,7 @@ def library_view(
 
     total_pages = max(1, (total + per_page - 1) // per_page)
 
-    return templates.TemplateResponse("library.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "library.html", {
         "variants": variants,
         "retailer": retailer,
         "status_filter": status,
@@ -403,8 +384,7 @@ def debug_dashboard_full(request: Request, db: Session = Depends(get_db)):
     import traceback
     try:
         total_variants = db.query(Variant).count()
-        rendered = templates.TemplateResponse("dashboard.html", {
-            "request": request,
+        rendered = templates.TemplateResponse(request, "dashboard.html", {
             "total_variants": total_variants,
             "sum_attempts": 0,
             "total_successes": 0,
